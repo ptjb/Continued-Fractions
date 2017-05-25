@@ -1,12 +1,17 @@
 #include "rational.h"
 
-rational::rational(ulli numerator, ulli denominator, sign s) : numerator(numerator), denominator(denominator), signum(s){}
+rational::rational(rational::ulli numerator, rational::ulli denominator, sign s) : numerator(numerator), denominator(denominator), signum(s){
+
+	this->Simplify();
+}
 
 rational::rational(const rational& original){
 
 	this->numerator = original.numerator;			//tuple = operator
 	this->denominator = original.denominator;
 	this->signum = original.signum;
+
+	this->Simplify();
 }
 
 rational::~rational(){}
@@ -21,9 +26,9 @@ void swap(rational& first, rational& second){
 	return;
 }
 
-ulli rational::GetNumerator(){ return numerator;}
+rational::ulli rational::GetNumerator(){ return numerator;}
 
-ulli rational::GetDenominator(){ return denominator;}
+rational::ulli rational::GetDenominator(){ return denominator;}
 
 int rational::GetSign(){ 
 
@@ -31,13 +36,13 @@ int rational::GetSign(){
 	return -1;
 }
 
-void rational::SetNumerator(ulli numerator){
+void rational::SetNumerator(rational::ulli numerator){
 
 	this->numerator = numerator;
 	return; 
 }
 
-void rational::SetDenominator(ulli denominator){
+void rational::SetDenominator(rational::ulli denominator){
 
 	this->denominator = denominator;
 	return;
@@ -51,13 +56,22 @@ void rational::SetSign(sign s){
 
 void rational::Simplify(){
 
+	try{
+
+		this->GetDenominator();
+	}
+	catch (rational::ulli i){
+
+		if (i == 0ULL) std::cerr << "Illegal Rational. Denominator cannot be 0.";
+	}
+
 	//take the smaller number's sqrt to check for factors, because it won't have any beyond that and it hardly matters if
 	//the larger number does
-	ulli newnumerator = this->numerator;
-	ulli newdenominator = this->denominator;
+	rational::ulli newnumerator = this->numerator;
+	rational::ulli newdenominator = this->denominator;
 
 	//defines the convention were 0 is (0,1,p)
-	if (newnumerator == 0){
+	if (newnumerator == 0ULL){
 
 		this->denominator = 1ULL;
 		this->signum = sign::p;
@@ -74,11 +88,11 @@ void rational::Simplify(){
 
 	//THIS TEST IS FOR PRIMES. THIS WILL NOT PICK UP 17/17 for example
 	//I do think that now the 1/1 case has been dealt with, this should still work
-	ulli limit = (newnumerator < newdenominator) ? (ulli)sqrt(newnumerator) : (ulli)sqrt(newdenominator);
+	rational::ulli limit = (newnumerator < newdenominator) ? (rational::ulli)sqrt(newnumerator) : (rational::ulli)sqrt(newdenominator);
 
-	//ulli limit = (newnumerator < newdenominator) ? (ulli)newnumerator : (ulli)newdenominator;
+	//rational::ulli limit = (newnumerator < newdenominator) ? (rational::ulli)newnumerator : (rational::ulli)newdenominator;
 
-	ulli factor = 2ULL;
+	rational::ulli factor = 2ULL;
 	for(;;){
 
 		//while they keep being divisible by factor, they keep getting reduced by it
@@ -86,7 +100,7 @@ void rational::Simplify(){
 
 			newnumerator /= factor;
 			newdenominator /= factor;
-			limit = (newnumerator < newdenominator) ? (ulli)sqrt(newnumerator) : (ulli)sqrt(newdenominator);
+			limit = (newnumerator < newdenominator) ? (rational::ulli)sqrt(newnumerator) : (rational::ulli)sqrt(newdenominator);
 			continue;
 		}
 
@@ -108,7 +122,7 @@ void rational::Simplify(){
 
 void rational::Invert(){
 
-	ulli old_numerator = numerator;
+	rational::ulli old_numerator = numerator;
 
 	numerator = denominator;
 	denominator = old_numerator;
@@ -137,10 +151,10 @@ void rational::SquareRoot(int sig_fig){
 	}
 
 	//this gets the integral part of what the double result is, providing the first guess
-	ulli temp_numerator = (ulli)sqrt(this->numerator); 	
-	ulli temp_denominator = 1ULL;
+	rational::ulli temp_numerator = (rational::ulli)sqrt(this->numerator); 	
+	rational::ulli temp_denominator = 1ULL;
 
-	ulli size_limit = 1ULL;
+	rational::ulli size_limit = 1ULL;
 
 	for (int i = 0; i < sig_fig; i++){
 
@@ -161,7 +175,7 @@ void rational::SquareRoot(int sig_fig){
 }
 
 
-rational& rational::operator=(const rational rhs){		//const in argument to allow temporary object passing
+rational& rational::operator=(rational rhs){		//(REMOVED)const in argument to allow temporary object passing
 
 	swap(*this, rhs);			//omission of self-check is due to infrequency of occurance
 	return *this; 
@@ -169,7 +183,7 @@ rational& rational::operator=(const rational rhs){		//const in argument to allow
 
 rational rational::operator+(const rational& second){
 
-	rational new_rational;
+	rational new_rational(0ULL);
 
 	//same in all cases
 	new_rational.denominator = this->denominator * second.denominator;
@@ -206,7 +220,7 @@ rational rational::operator+(const rational& second){
 }
 
 rational rational::operator-(const rational& second){
-	rational new_rational;
+	rational new_rational(0ULL);
 
 	//same in all cases
 	new_rational.denominator = this->denominator * second.denominator;
@@ -244,7 +258,7 @@ rational rational::operator-(const rational& second){
 
 rational rational::operator*(const rational& second){
 
-	rational new_rational;
+	rational new_rational(0ULL);
 
 	new_rational.numerator = this->numerator * second.numerator;
 	new_rational.denominator = this->denominator * second.denominator;
@@ -257,7 +271,7 @@ rational rational::operator*(const rational& second){
 
 rational rational::operator/(const rational& second){
 
-	rational new_rational;
+	rational new_rational(0ULL);
 
 	new_rational.numerator = this->numerator * second.denominator;
 	new_rational.denominator = this->denominator * second.numerator;
@@ -270,24 +284,24 @@ rational rational::operator/(const rational& second){
 
 rational& rational::operator+=(const rational second){
 
-	this = this + second;
+	*this = *this + second;
 	return *this;
 }
 
 rational& rational::operator-=(const rational second){
 
-	this = this - second;
+	*this = *this - second;
 	return *this;
 }
 
 rational& rational::operator*=(const rational second){
 
-	this = this * second;
+	*this = *this * second;
 	return *this;
 }
 
 rational& rational::operator/=(const rational second){
 
-	this = this / second;
+	*this = *this / second;
 	return *this;
 }

@@ -12,12 +12,18 @@ class rational{
 
 	typedef unsigned long long int ulli;
 
-	ulli numerator;
+	/*ulli numerator;
 	ulli denominator;
 	sign signum;
+	*/
 			// p or n for positive or and negative																
 	
 	public:
+		
+		ulli numerator;
+		ulli denominator;
+		sign signum;
+
 		//REQUIRED:
 		//
 		//Constructor
@@ -46,6 +52,10 @@ class rational{
 
 		friend void swap(rational&,rational&);
 
+		/*friend void Test_Constructor();
+		friend void Test_Copy_Constructor();
+		*/
+		
 		ulli GetNumerator();
 		ulli GetDenominator();
 		int GetSign();
@@ -68,12 +78,14 @@ class rational{
 		rational operator*(const rational&);
 		rational operator/(const rational&);
 
-		rational& operator+=(const rational&);
-		rational& operator-=(const rational&);
-		rational& operator*=(const rational&);
-		rational& operator/=(const rational&);
+		rational& operator+=(const rational);
+		rational& operator-=(const rational);
+		rational& operator*=(const rational);
+		rational& operator/=(const rational);
 
 		//you will manage without the relational operators for now
+
+
 
 	/*private:
 		void ManageSigns();		//handle negatives properly
